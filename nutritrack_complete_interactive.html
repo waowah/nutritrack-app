@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
+    <title>NutriTrack Pro - Complete Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 100%);
+            color: var(--text-primary);
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 15px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 60px;
+            padding: 10px 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 0.75em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 12px;
+            font-size: 1em;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-small {
+            padding: 10px 14px;
+            font-size: 0.85em;
+            width: auto;
+            margin: 0;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        /* INPUT FORM */
+        .input-form {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input[type="number"],
+        input[type="date"],
+        input[type="time"],
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* SUPPLEMENT ITEM */
+        .supplement-item {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .supplement-info h4 {
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .supplement-info p {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .status-taken {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .status-pending:active {
+            transform: scale(0.95);
+        }
+
+        /* STAT DISPLAY */
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* LOG ENTRY */
+        .entry {
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-info h4 {
+            font-size: 0.85em;
+            margin-bottom: 4px;
+        }
+
+        .entry-info p {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        /* QUICK BUTTONS */
+        .quick-btn-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-btn {
+            padding: 12px 8px;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:active {
+            transform: scale(0.95);
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        /* CAMERA BUTTON */
+        .camera-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        /* CHART */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            height: 250px;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            display: flex;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            flex: 1;
+            min-width: 55px;
+            padding: 8px 6px;
+            border: none;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 0.75em;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 380px) {
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title">🥗 NutriTrack Pro</div>
+            <div style="font-size: 0.75em; color: var(--text-secondary); margin-top: 4px;">
+                Today: <span id="todayCalories">0</span> cal | <span id="todayProtein">0</span>g P | <span id="todayWater">0</span>ml
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            <!-- TABS -->
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('food')">🍽️ Food</button>
+                <button class="tab-btn" onclick="switchTab('water')">💧 Water</button>
+                <button class="tab-btn" onclick="switchTab('supplements')">💊 Supps</button>
+                <button class="tab-btn" onclick="switchTab('weight')">⚖️ Weight</button>
+                <button class="tab-btn" onclick="switchTab('body')">💪 Body</button>
+                <button class="tab-btn" onclick="switchTab('trends')">📈 Trends</button>
+            </div>
+
+            <!-- TAB 1: FOOD LOGGING -->
+            <div id="food-tab" class="tab-content active">
+                <button class="camera-button" onclick="openCamera()">
+                    <span>📷</span>
+                    <span>Take Food Photo & Analyze</span>
+                </button>
+
+                <div class="card">
+                    <div class="card-title">Or Log Meal Manually</div>
+                    <div class="input-form">
+                        <div class="form-group">
+                            <label class="form-label">Meal Type</label>
+                            <select id="mealType">
+                                <option value="breakfast">🍳 Breakfast</option>
+                                <option value="snack">🥜 Snack</option>
+                                <option value="lunch">🥗 Lunch</option>
+                                <option value="dinner">🍽️ Dinner</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Food Description</label>
+                            <textarea id="foodDesc" placeholder="e.g., Grilled chicken breast 200g, brown rice 1 cup, broccoli"></textarea>
+                        </div>
+
+                        <div class="btn-grid">
+                            <div class="form-group">
+                                <label class="form-label">Calories</label>
+                                <input type="number" id="calories" placeholder="500">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Protein (g)</label>
+                                <input type="number" id="protein" placeholder="45">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Carbs (g)</label>
+                                <input type="number" id="carbs" placeholder="50">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fat (g)</label>
+                                <input type="number" id="fat" placeholder="15">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Saturated Fat (g) - LDL Focus!</label>
+                            <input type="number" id="satFat" placeholder="3" step="0.1">
+                        </div>
+
+                        <button class="btn btn-success" onclick="logMeal()">✅ Log Meal</button>
+                    </div>
+                </div>
+
+                <!-- TODAY'S SUMMARY -->
+                <div class="card">
+                    <div class="card-title">📊 Today's Summary</div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sumCalories">0</div>
+                        <div class="stat-label">Calories (Target: 1,700)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sumProtein">0g</div>
+                        <div class="stat-label">Protein (Target: 110g)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="sumSatFat">0g</div>
+                        <div class="stat-label">Saturated Fat (Max: 10g) 🎯 LDL</div>
+                    </div>
+                </div>
+
+                <!-- MEAL LOG -->
+                <div class="card">
+                    <div class="card-title">📋 Today's Meals</div>
+                    <div id="mealLog"></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: WATER LOGGING -->
+            <div id="water-tab" class="tab-content" style="display: none;">
+                <div class="card">
+                    <div class="card-title">💧 Quick Water Log</div>
+                    <div class="quick-btn-grid">
+                        <button class="quick-btn" onclick="addWater(250)">250ml</button>
+                        <button class="quick-btn" onclick="addWater(500)">500ml</button>
+                        <button class="quick-btn" onclick="addWater(750)">750ml</button>
+                        <button class="quick-btn" onclick="addWater(1000)">1L</button>
+                    </div>
+                </div>
+
+                <div class="input-form">
+                    <div class="form-group">
+                        <label class="form-label">Custom Amount (ml)</label>
+                        <input type="number" id="waterAmount" placeholder="250">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select id="waterType">
+                            <option value="water">💧 Water</option>
+                            <option value="tea">🍵 Green Tea</option>
+                            <option value="coffee">☕ Coffee</option>
+                            <option value="sports">⚽ Sports Drink</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="logWater()">✅ Log Water</button>
+                </div>
+
+                <!-- WATER SUMMARY -->
+                <div class="stat-card">
+                    <div class="stat-value" id="waterTotal">0ml</div>
+                    <div class="stat-label">Today's Water (Goal: 2,500-3,000ml)</div>
+                </div>
+
+                <!-- WATER LOG -->
+                <div class="card">
+                    <div class="card-title">📋 Today's Water Intake</div>
+                    <div id="waterLog"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SUPPLEMENTS -->
+            <div id="supplements-tab" class="tab-content" style="display: none;">
+                <div class="card">
+                    <div class="card-title">💊 Today's Supplements</div>
+                    <p style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 16px;">
+                        Tap "Take Now" when you consume each supplement. Track your daily compliance!
+                    </p>
+                </div>
+
+                <!-- MORNING -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), rgba(245, 158, 11, 0.05));">
+                    <div class="card-title" style="color: #fbbf24;">🌅 06:30 AM - MORNING (Empty Stomach)</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🧲 Magnesium Glycinate 133mg</h4>
+                            <p>Empty stomach • Sleep recovery</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp1" onclick="toggleSupplement(1)">Take Now</button>
+                    </div>
+
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🦠 Probiotic LactoBif® 5B CFU</h4>
+                            <p>Empty stomach • LDL reduction</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp2" onclick="toggleSupplement(2)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- BREAKFAST -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(16, 185, 129, 0.05));">
+                    <div class="card-title" style="color: #86efac;">🍳 07:00 AM - WITH BREAKFAST</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>💊 Women's Multivitamin</h4>
+                            <p>With food • Full spectrum coverage</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp3" onclick="toggleSupplement(3)">Take Now</button>
+                    </div>
+
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🦞 Astaxanthin 12mg</h4>
+                            <p>With eggs/fat • LDL oxidation prevention</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp4" onclick="toggleSupplement(4)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- SNACK -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(96, 165, 250, 0.05));">
+                    <div class="card-title" style="color: #93c5fd;">🥛 10:00 AM - WITH SNACK</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🐟 Omega-3 Fish Oil 1000mg</h4>
+                            <p>With food • Triglyceride reduction</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp5" onclick="toggleSupplement(5)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- AFTERNOON -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(244, 63, 94, 0.05));">
+                    <div class="card-title" style="color: #f472b6;">🌤️ 15:00 (3 PM) - WITH SNACK</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>⚡ CoQ10 100mg</h4>
+                            <p>With almonds/fat • Heart energy</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp6" onclick="toggleSupplement(6)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- DINNER -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.05));">
+                    <div class="card-title" style="color: #d8b4fe;">🍽️ 18:30 (6:30 PM) - WITH DINNER</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🍊 Vitamin C 1000mg</h4>
+                            <p>With food • Antioxidant synergy</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp7" onclick="toggleSupplement(7)">Take Now</button>
+                    </div>
+
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🧲 Magnesium Glycinate 133mg</h4>
+                            <p>With dinner • Sleep preparation</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp8" onclick="toggleSupplement(8)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- BEDTIME -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(96, 165, 250, 0.05));">
+                    <div class="card-title" style="color: #93c5fd;">🌙 21:00 (9 PM) - BEDTIME</div>
+                    
+                    <div class="supplement-item">
+                        <div class="supplement-info">
+                            <h4>🦠 Probiotic LactoBif® 5B CFU</h4>
+                            <p>Before sleep • Overnight gut healing</p>
+                        </div>
+                        <button class="status-badge status-pending" id="supp9" onclick="toggleSupplement(9)">Take Now</button>
+                    </div>
+                </div>
+
+                <!-- SUMMARY -->
+                <div class="stat-card">
+                    <div class="stat-value"><span id="suppTaken">0</span>/9</div>
+                    <div class="stat-label">Supplements Taken Today</div>
+                </div>
+            </div>
+
+            <!-- TAB 4: WEIGHT -->
+            <div id="weight-tab" class="tab-content" style="display: none;">
+                <div class="input-form">
+                    <div class="form-group">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" id="weightValue" placeholder="61.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="weightDate">
+                    </div>
+                    <button class="btn btn-success" onclick="logWeight()">✅ Log Weight</button>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="currentWeight">--</div>
+                    <div class="stat-label">Current Weight (Goal: 56kg)</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📋 Weight History</div>
+                    <div id="weightHistory"></div>
+                </div>
+            </div>
+
+            <!-- TAB 5: BODY COMPOSITION -->
+            <div id="body-tab" class="tab-content" style="display: none;">
+                <div class="input-form">
+                    <div class="form-group">
+                        <label class="form-label">Body Fat %</label>
+                        <input type="number" id="bodyFat" placeholder="30.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Muscle Mass (kg)</label>
+                        <input type="number" id="muscleMass" placeholder="42.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="bodyDate">
+                    </div>
+                    <button class="btn btn-success" onclick="logBody()">✅ Log Body Composition</button>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-value" id="currentFat">--</div>
+                    <div class="stat-label">Body Fat % (Goal: <28%)</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📋 Body Composition History</div>
+                    <div id="bodyHistory"></div>
+                </div>
+            </div>
+
+            <!-- TAB 6: TRENDS -->
+            <div id="trends-tab" class="tab-content" style="display: none;">
+                <div class="card-title">📈 Weight Trend (30 Days)</div>
+                <div class="chart-container">
+                    <canvas id="weightChart"></canvas>
+                </div>
+
+                <div class="card-title">💧 Hydration Trend (7 Days)</div>
+                <div class="chart-container">
+                    <canvas id="waterChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="switchTab('food')">Food</button>
+            <button class="nav-btn" onclick="switchTab('water')">Water</button>
+            <button class="nav-btn" onclick="switchTab('supplements')">Supps</button>
+            <button class="nav-btn" onclick="switchTab('weight')">Weight</button>
+            <button class="nav-btn" onclick="switchTab('body')">Body</button>
+            <button class="nav-btn" onclick="switchTab('trends')">Trends</button>
+        </div>
+    </div>
+
+    <input type="file" id="cameraInput" accept="image/*" capture="environment">
+
+    <script>
+        // DATA STORAGE
+        let meals = [];
+        let waterIntake = [];
+        let supplements = [false, false, false, false, false, false, false, false, false];
+        let weightLog = [];
+        let bodyLog = [];
+        let charts = {};
+
+        // INITIALIZE DATES
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('weightDate').value = today;
+            document.getElementById('bodyDate').value = today;
+            loadData();
+            updateAllDisplays();
+        });
+
+        // CAMERA
+        function openCamera() {
+            document.getElementById('cameraInput').click();
+        }
+
+        document.getElementById('cameraInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                alert('📸 Photo captured! AI analysis coming soon. For now, use manual logging.');
+            }
+        });
+
+        // MEAL LOGGING
+        function logMeal() {
+            const meal = {
+                id: Date.now(),
+                type: document.getElementById('mealType').value,
+                description: document.getElementById('foodDesc').value,
+                calories: parseFloat(document.getElementById('calories').value) || 0,
+                protein: parseFloat(document.getElementById('protein').value) || 0,
+                carbs: parseFloat(document.getElementById('carbs').value) || 0,
+                fat: parseFloat(document.getElementById('fat').value) || 0,
+                satFat: parseFloat(document.getElementById('satFat').value) || 0,
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (!meal.description || meal.calories === 0) {
+                alert('Please enter food description and calories');
+                return;
+            }
+
+            meals.push(meal);
+            saveData();
+            updateAllDisplays();
+
+            // Clear form
+            document.getElementById('foodDesc').value = '';
+            document.getElementById('calories').value = '';
+            document.getElementById('protein').value = '';
+            document.getElementById('carbs').value = '';
+            document.getElementById('fat').value = '';
+            document.getElementById('satFat').value = '';
+
+            alert('✅ Meal logged successfully!');
+        }
+
+        function deleteMeal(id) {
+            meals = meals.filter(m => m.id !== id);
+            saveData();
+            updateAllDisplays();
+        }
+
+        function renderMealLog() {
+            const container = document.getElementById('mealLog');
+            if (meals.length === 0) {
+                container.innerHTML = '<div class="empty-state">No meals logged today</div>';
+                return;
+            }
+
+            let html = '';
+            [...meals].reverse().forEach(meal => {
+                const emoji = { breakfast: '🍳', snack: '🥜', lunch: '🥗', dinner: '🍽️' };
+                html += `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <h4>${emoji[meal.type]} ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}</h4>
+                            <p>${meal.description} • ${meal.time}</p>
+                            <p style="margin-top: 4px;">P:${meal.protein}g C:${meal.carbs}g F:${meal.fat}g | SF:${meal.satFat}g</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight: 600; color: #60a5fa;">${meal.calories}c</div>
+                            <button class="delete-btn" onclick="deleteMeal(${meal.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // WATER LOGGING
+        function addWater(amount) {
+            logWaterIntake(amount, document.getElementById('waterType').value);
+        }
+
+        function logWater() {
+            const amount = parseFloat(document.getElementById('waterAmount').value);
+            if (!amount || amount <= 0) {
+                alert('Please enter water amount');
+                return;
+            }
+            logWaterIntake(amount, document.getElementById('waterType').value);
+            document.getElementById('waterAmount').value = '';
+        }
+
+        function logWaterIntake(amount, type) {
+            waterIntake.push({
+                id: Date.now(),
+                amount,
+                type,
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            });
+            saveData();
+            updateAllDisplays();
+            alert(`✅ ${amount}ml logged!`);
+        }
+
+        function deleteWater(id) {
+            waterIntake = waterIntake.filter(w => w.id !== id);
+            saveData();
+            updateAllDisplays();
+        }
+
+        function renderWaterLog() {
+            const container = document.getElementById('waterLog');
+            if (waterIntake.length === 0) {
+                container.innerHTML = '<div class="empty-state">No water logged today</div>';
+                return;
+            }
+
+            let html = '';
+            [...waterIntake].reverse().forEach(entry => {
+                const emoji = { water: '💧', tea: '🍵', coffee: '☕', sports: '⚽' };
+                html += `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <h4>${emoji[entry.type]} ${entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}</h4>
+                            <p>${entry.time}</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight: 600; color: #60a5fa;">${entry.amount}ml</div>
+                            <button class="delete-btn" onclick="deleteWater(${entry.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // SUPPLEMENTS
+        function toggleSupplement(index) {
+            const idx = index - 1;
+            supplements[idx] = !supplements[idx];
+            saveData();
+            updateSupplementUI();
+        }
+
+        function updateSupplementUI() {
+            supplements.forEach((taken, idx) => {
+                const badge = document.getElementById('supp' + (idx + 1));
+                if (taken) {
+                    badge.className = 'status-badge status-taken';
+                    badge.textContent = '✅ Taken';
+                } else {
+                    badge.className = 'status-badge status-pending';
+                    badge.textContent = 'Take Now';
+                }
+            });
+
+            const count = supplements.filter(s => s).length;
+            document.getElementById('suppTaken').textContent = count;
+        }
+
+        // WEIGHT LOGGING
+        function logWeight() {
+            const weight = parseFloat(document.getElementById('weightValue').value);
+            const date = document.getElementById('weightDate').value;
+
+            if (!weight || !date) {
+                alert('Please enter weight and date');
+                return;
+            }
+
+            weightLog.push({
+                id: Date.now(),
+                weight,
+                date,
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            weightLog.sort((a, b) => new Date(a.date) - new Date(b.date));
+            saveData();
+            updateAllDisplays();
+            document.getElementById('weightValue').value = '';
+            alert('✅ Weight logged!');
+        }
+
+        function deleteWeight(id) {
+            weightLog = weightLog.filter(w => w.id !== id);
+            saveData();
+            updateAllDisplays();
+        }
+
+        function renderWeightHistory() {
+            const container = document.getElementById('weightHistory');
+            if (weightLog.length === 0) {
+                container.innerHTML = '<div class="empty-state">No weight entries</div>';
+                return;
+            }
+
+            let html = '';
+            [...weightLog].reverse().forEach(entry => {
+                html += `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <h4>${entry.date}</h4>
+                            <p>${entry.time}</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight: 600; color: #60a5fa;">${entry.weight.toFixed(1)}kg</div>
+                            <button class="delete-btn" onclick="deleteWeight(${entry.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            if (weightLog.length > 0) {
+                document.getElementById('currentWeight').textContent = weightLog[weightLog.length - 1].weight.toFixed(1) + ' kg';
+            }
+        }
+
+        // BODY COMPOSITION
+        function logBody() {
+            const bodyFat = parseFloat(document.getElementById('bodyFat').value);
+            const muscleMass = parseFloat(document.getElementById('muscleMass').value);
+            const date = document.getElementById('bodyDate').value;
+
+            if (!bodyFat || !muscleMass || !date) {
+                alert('Please enter all fields');
+                return;
+            }
+
+            bodyLog.push({
+                id: Date.now(),
+                bodyFat,
+                muscleMass,
+                date
+            });
+
+            bodyLog.sort((a, b) => new Date(a.date) - new Date(b.date));
+            saveData();
+            updateAllDisplays();
+
+            document.getElementById('bodyFat').value = '';
+            document.getElementById('muscleMass').value = '';
+            alert('✅ Body composition logged!');
+        }
+
+        function deleteBody(id) {
+            bodyLog = bodyLog.filter(b => b.id !== id);
+            saveData();
+            updateAllDisplays();
+        }
+
+        function renderBodyHistory() {
+            const container = document.getElementById('bodyHistory');
+            if (bodyLog.length === 0) {
+                container.innerHTML = '<div class="empty-state">No body composition entries</div>';
+                return;
+            }
+
+            let html = '';
+            [...bodyLog].reverse().forEach(entry => {
+                html += `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <h4>${entry.date}</h4>
+                            <p>Fat: ${entry.bodyFat.toFixed(1)}% | Muscle: ${entry.muscleMass.toFixed(1)}kg</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight: 600; color: #60a5fa;">${entry.bodyFat.toFixed(1)}%</div>
+                            <button class="delete-btn" onclick="deleteBody(${entry.id})">×</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            if (bodyLog.length > 0) {
+                document.getElementById('currentFat').textContent = bodyLog[bodyLog.length - 1].bodyFat.toFixed(1) + '%';
+            }
+        }
+
+        // UPDATE ALL DISPLAYS
+        function updateAllDisplays() {
+            // Food summary
+            const totalCal = meals.reduce((sum, m) => sum + m.calories, 0);
+            const totalProtein = meals.reduce((sum, m) => sum + m.protein, 0);
+            const totalSatFat = meals.reduce((sum, m) => sum + m.satFat, 0);
+
+            document.getElementById('todayCalories').textContent = totalCal;
+            document.getElementById('todayProtein').textContent = Math.round(totalProtein);
+            document.getElementById('sumCalories').textContent = totalCal;
+            document.getElementById('sumProtein').textContent = Math.round(totalProtein) + 'g';
+            document.getElementById('sumSatFat').textContent = totalSatFat.toFixed(1) + 'g';
+
+            // Water summary
+            const totalWater = waterIntake.reduce((sum, w) => sum + w.amount, 0);
+            document.getElementById('todayWater').textContent = totalWater;
+            document.getElementById('waterTotal').textContent = totalWater + 'ml';
+
+            // Render logs
+            renderMealLog();
+            renderWaterLog();
+            renderWeightHistory();
+            renderBodyHistory();
+            updateSupplementUI();
+            updateCharts();
+        }
+
+        // CHARTS
+        function updateCharts() {
+            updateWeightChart();
+            updateWaterChart();
+        }
+
+        function updateWeightChart() {
+            const ctx = document.getElementById('weightChart');
+            if (!ctx) return;
+
+            const last30 = weightLog.slice(-30);
+            if (charts.weight) charts.weight.destroy();
+
+            if (last30.length === 0) {
+                ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                return;
+            }
+
+            charts.weight = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30.map(e => e.date.slice(-5)),
+                    datasets: [{
+                        label: 'Weight (kg)',
+                        data: last30.map(e => e.weight),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Goal (56kg)',
+                        data: Array(last30.length).fill(56),
+                        borderColor: '#10b981',
+                        borderDash: [5, 5],
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#cbd5e1' } } },
+                    scales: {
+                        y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
+
+        function updateWaterChart() {
+            const ctx = document.getElementById('waterChart');
+            if (!ctx) return;
+
+            if (charts.water) charts.water.destroy();
+
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const total = waterIntake.filter(w => w.date === dateStr).reduce((sum, w) => sum + w.amount, 0);
+                last7Days.push({ date: dateStr.slice(-5), total });
+            }
+
+            charts.water = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: last7Days.map(d => d.date),
+                    datasets: [{
+                        label: 'Water (ml)',
+                        data: last7Days.map(d => d.total),
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#cbd5e1' } } },
+                    scales: {
+                        y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
+
+        // TAB SWITCHING
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'trends') {
+                setTimeout(updateCharts, 100);
+            }
+        }
+
+        // DATA PERSISTENCE
+        function saveData() {
+            const data = { meals, waterIntake, supplements, weightLog, bodyLog };
+            localStorage.setItem('nutritrack_complete_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('nutritrack_complete_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                meals = data.meals || [];
+                waterIntake = data.waterIntake || [];
+                supplements = data.supplements || [false, false, false, false, false, false, false, false, false];
+                weightLog = data.weightLog || [];
+                bodyLog = data.bodyLog || [];
+            }
+        }
+
+        // AUTO-SAVE
+        setInterval(saveData, 30000);
+        window.addEventListener('beforeunload', saveData);
+    </script>
+</body>
+</html>
